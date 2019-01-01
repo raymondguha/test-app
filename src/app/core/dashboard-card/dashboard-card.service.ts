@@ -6,6 +6,5 @@ import { CardType, DashboardCard } from './model';
 })
 export class DashboardCardService {
 
-  private 
   constructor() { }
 }

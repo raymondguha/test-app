@@ -6,6 +6,10 @@ import { AppComponent } from './app.component';
 import { UsersComponent } from './users/users.component';
 import { HomeComponent } from './home/home.component';
 
+import {AgGridModule} from "ag-grid-angular";
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -15,6 +19,8 @@ import { HomeComponent } from './home/home.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    AgGridModule,
+    BrowserAnimationsModule 
    // PositionTransferRequestsModule // remove for lazy loading to work
   ],
   providers: [],

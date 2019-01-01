@@ -25,5 +25,21 @@
         {
             "hits": 5
         }
+    ],
+
+    "clients" : [
+        {
+            "name": "AbcClient 123"
+        },
+        {
+            "name": "DefClient 345"
+        },
+        {
+            "name": "GhiClient 567"
+        },
+        {
+            "name": "LmonClient 890"
+        }
+
     ]
 }
