@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { PositionTransferRequestsService } from './shared/position-transfer-requests.service';
 import { TransferRequest, Client } from './shared/model';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { debounceTime, startWith, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { debounceTime, startWith, map, distinctUntilChanged } from 'rxjs/operators';
 import {FormControl} from '@angular/forms';
 
 @Component({
@@ -20,9 +20,13 @@ export class PositionTransferRequestsComponent implements OnInit {
 
   clients: Client[];
 
-  filteredClientOptions: Observable<Client[]>;
+  $filteredClientOptions: Observable<Client[]>;
 
   clientFormControl = new FormControl();
+
+  selectedClients: Client[] = new Array<Client>();
+
+  @ViewChild('clientName') el: ElementRef;
 
 
   ngOnInit() {
@@ -34,33 +38,48 @@ export class PositionTransferRequestsComponent implements OnInit {
 
     //we can skip subcribng to the observable and storing results
     //locally on the coponent. we can do this by using the async pipe in the templates
-  //  this.$clients = this.apiService.getClients();
+    // this.$clients = this.apiService.getClients();
 
-  this.apiService.getClients().subscribe(
-    clients => {        
-      this.clients = clients;
-
-      this.filteredClientOptions = this.clientFormControl.valueChanges.pipe(
-        debounceTime(250),
-        startWith<string | Client>(''),
-        map(value => typeof value === 'string'? value : value.name),
-        map(name => name ? this.filterClients(name) : this.clients)
-       // map(name => name ? this.filterClients(name) : this.$clients.pipe(map( d => d.slice())) )
-      );
-    }
-    
-  );
-  
- 
+    this.apiService.getClients().subscribe(
+      clients => {        
+        this.clients = clients;
+        this.createControl();
+      }    
+    );
     
   }
 
-  private filterClients(name: string): any {
-    const filterValue = name.toLowerCase();
 
-    // return this.$clients.pipe(
-    //   map(clients => { clients.filter(option => option.name.toLowerCase().indexOf(filterValue) === 0) })
-    // );
+  createControl(): void {
+    this.clientFormControl = new FormControl();
+     this.$filteredClientOptions = this.clientFormControl.valueChanges.pipe(
+      debounceTime(250),
+      startWith<string | Client>(''),
+      distinctUntilChanged(),
+      map(value => typeof value === 'string'? value : value.name),
+      map(name => name ? this.filterClients(name) : this.clients.slice()),
+    )
+
+    this.clientFormControl.valueChanges.subscribe(client => {
+      if (client === null || typeof client === 'string') {
+        return;
+      }
+      this.selectedClients.push(client);
+      let i = this.clients.findIndex(c => c.name.toLowerCase() === client.name.toLowerCase());
+      this.clients.splice(i,1);
+      //we need to recreate control again so the autocomplete displays
+      this.createControl();
+    })
+  }
+
+  //remove focus once a valid client has been selected
+  blur() {
+    this.el.nativeElement.value = '';
+    this.el.nativeElement.blur();
+  }
+
+  private filterClients(name: string): Client[] {
+    const filterValue = name.toLowerCase();
 
     return this.clients.filter(option => option.name.toLowerCase().includes(filterValue));
   }

@@ -1,15 +1,18 @@
-<p>
-  position-transfer-requests works!
-</p>
+
 <h2>{{$noOfRequests | async}}</h2>
 
-<form class="example-form"> 
+<!-- <form class="example-form">  -->
   <mat-form-field class="example-full-width">
-    <input type="text" placeholder="Client" aria-label="Client" matInput [formControl]="clientFormControl" [matAutocomplete]="auto" autofocus> 
+    <!-- add autofocus -->
+    <!-- <input type="text" placeholder="Client" aria-label="Client" matInput [formControl]="clientFormControl" [matAutocomplete]="auto" autofocus>  -->
+    <input type="text" placeholder="Client" aria-label="Client" matInput [formControl]="clientFormControl" [matAutocomplete]="auto" #clientName> 
     <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayClientFn">
-      <mat-option *ngFor="let client of filteredClientOptions | async" [value]="client">
+      <mat-option *ngFor="let client of $filteredClientOptions | async" [value]="client" (click)="blur()">
         {{client.name}}
       </mat-option>
     </mat-autocomplete>
-  </mat-form-field>
-</form>
+  </mat-form-field>  
+  <ul *ngFor="let client of selectedClients">
+    <li>{{client.name}}</li>
+  </ul>
+<!-- </form> -->
